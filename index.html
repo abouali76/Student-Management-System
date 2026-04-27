@@ -274,6 +274,7 @@
         &copy; 2026 نظام الإدارة المتقدم
     </div>
 
+    <script src="db.js"></script>
     <script>
         // Check if already logged in
         try {
@@ -288,16 +289,22 @@
         const passwordInput = document.getElementById('password');
         const errorMessage = document.getElementById('errorMessage');
 
-        loginForm.addEventListener('submit', (e) => {
+        // Initialize DB
+        db.init().catch(err => console.error("DB Init failed:", err));
+
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const password = passwordInput.value;
             
             try {
-                // Roles: 1 -> Admin
+                // Get stored password from DB (default is '1')
+                const storedConfig = await db.get('config', 'admin_password');
+                const actualPass = storedConfig ? storedConfig.value : '1';
+
                 let role = '';
-                if (password === '1') role = 'admin';
-                else if (password === '123') role = 'admin'; // Both are admin for now
+                if (password === actualPass) role = 'admin';
+                else if (password === '123' && actualPass === '1') role = 'admin'; // Legacy fallback
 
                 if (role) {
                     // Set login status and role
@@ -325,9 +332,9 @@
                 }
             } catch (err) {
                 console.error("Login error:", err);
-                alert("حدث خطأ أثناء تسجيل الدخول. يرجى التأكد من أن المتصفح يسمح بالتخزين المحلي.");
-                // Fallback redirect if storage fails but password is correct
+                // Fallback if DB fails
                 if (password === '1') window.location.href = 'school_manager.html';
+                else alert("حدث خطأ أثناء تسجيل الدخول. يرجى إعادة المحاولة.");
             }
         });
 

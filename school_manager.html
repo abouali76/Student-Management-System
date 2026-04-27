@@ -1169,6 +1169,32 @@
                     </div>
                 </div>
             </div>
+
+            <div class="glass-card" style="max-width: 600px; margin-top: 1.5rem;">
+                <div class="section-header">
+                    <h3>إعدادات الأمان</h3>
+                </div>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">يمكنك تغيير كلمة المرور الخاصة بدخول النظام من هنا.</p>
+
+                <form id="change-password-form" onsubmit="handleChangePassword(event)">
+                    <div style="display: grid; gap: 1rem;">
+                        <div class="form-group">
+                            <label>كلمة المرور الحالية</label>
+                            <input type="password" id="current-password" required placeholder="••••">
+                        </div>
+                        <div class="form-group">
+                            <label>كلمة المرور الجديدة</label>
+                            <input type="password" id="new-password" required placeholder="••••">
+                        </div>
+                        <div class="form-group">
+                            <label>تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" id="confirm-password" required placeholder="••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary">🔐 تحديث كلمة المرور</button>
+                    </div>
+                    <div id="password-message" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none;"></div>
+                </form>
+            </div>
         </div>
         <!-- LOGS VIEW -->
         <div id="view-logs" style="display: none;">
@@ -1801,15 +1827,52 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+                    alert("فشل استيراد البيانات. تأكد من صحة الملف.");
+                }
+            };
+            reader.readAsText(input.files[0]);
         }
 
-        // Initialize on load
-        window.onload = init;
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-password').value;
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            const msgEl = document.getElementById('password-message');
 
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userRole');
-            window.location.href = 'index.html';
+            if (newPass !== confirmPass) {
+                showMessage("كلمات المرور الجديدة غير متطابقة!", "error");
+                return;
+            }
+
+            try {
+                // Get stored password (default is '1' if not set)
+                const storedConfig = await db.get('config', 'admin_password');
+                const actualPass = storedConfig ? storedConfig.value : '1';
+
+                if (currentPass !== actualPass) {
+                    showMessage("كلمة المرور الحالية غير صحيحة!", "error");
+                    return;
+                }
+
+                // Update
+                await db.put('config', { key: 'admin_password', value: newPass });
+                await db.logAction('security', 'تم تغيير كلمة مرور النظام.');
+                
+                showMessage("تم تغيير كلمة المرور بنجاح ✅", "success");
+                document.getElementById('change-password-form').reset();
+            } catch (err) {
+                console.error("Password change error:", err);
+                showMessage("حدث خطأ أثناء حفظ كلمة المرور.", "error");
+            }
+        }
+
+        function showMessage(text, type) {
+            const msgEl = document.getElementById('password-message');
+            msgEl.textContent = text;
+            msgEl.style.display = 'block';
+            msgEl.style.color = type === 'error' ? '#ef4444' : '#10b981';
+            setTimeout(() => msgEl.style.display = 'none', 5000);
         }
 
         // --- MOBILE SIDEBAR ---

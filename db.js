@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = 'AcademiaProDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 class AcademiaDB {
     constructor() {
@@ -37,6 +37,11 @@ class AcademiaDB {
                     const logStore = db.createObjectStore('logs', { keyPath: 'id', autoIncrement: true });
                     logStore.createIndex('type', 'type', { unique: false });
                     logStore.createIndex('timestamp', 'timestamp', { unique: false });
+                }
+
+                // Config Store (Settings, Passwords)
+                if (!db.objectStoreNames.contains('config')) {
+                    db.createObjectStore('config', { keyPath: 'key' });
                 }
             };
 
@@ -128,7 +133,7 @@ class AcademiaDB {
 
     // --- Backup & Restore ---
     async exportAllData() {
-        const stores = ['students', 'transactions', 'logs'];
+        const stores = ['students', 'transactions', 'logs', 'config'];
         const exportData = {};
 
         for (const storeName of stores) {
@@ -147,7 +152,7 @@ class AcademiaDB {
             const imported = JSON.parse(jsonString);
             if (!imported.data) throw new Error("Invalid backup file format");
 
-            const stores = ['students', 'transactions', 'logs'];
+            const stores = ['students', 'transactions', 'logs', 'config'];
             
             // Clear and Import
             for (const storeName of stores) {
