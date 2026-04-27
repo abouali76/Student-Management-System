@@ -1384,6 +1384,7 @@
         }
 
         // --- NAVIGATION ---
+        // --- NAVIGATION ---
         function showView(viewId, element) {
             console.log("Navigating to:", viewId);
             try {
@@ -1393,47 +1394,22 @@
                     if (el) el.style.display = (v === viewId) ? 'block' : 'none';
                 });
 
-                // Update UI active state
                 document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                if (element) {
-                    element.classList.add('active');
-                } else {
-                    const navItems = document.querySelectorAll('.nav-item');
-                    navItems.forEach(item => {
-                        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(viewId)) {
-                            item.classList.add('active');
-                        }
-                    });
-                }
-
-                // Header Titles
-                const titles = {
-                    'dashboard': ['لوحة التحكم', 'أهلاً بك، إليك ملخص النظام لهذا اليوم.'],
-                    'students': ['إدارة الطلاب', 'بحث، تصفية، وتعديل بيانات الطلاب.'],
-                    'reports': ['التقارير المالية', 'تحليل الإيرادات واشتراكات الطلاب.'],
-                    'settings': ['الإعدادات والنسخ', 'إدارة قاعدة البيانات المحلية وتغيير السمات.'],
-                    'logs': ['سجل الحركات', 'تتبع كافة العمليات والتغييرات التي تمت على النظام.']
-                };
+                if (element) element.classList.add('active');
 
                 const titleEl = document.getElementById('view-title');
-                const subtitleEl = document.getElementById('view-subtitle');
-                if (titleEl && titles[viewId]) titleEl.textContent = titles[viewId][0];
-                if (subtitleEl && titles[viewId]) subtitleEl.textContent = titles[viewId][1];
-
-                // Auto-close sidebar on mobile
-                if (window.innerWidth <= 768 && typeof toggleSidebar === 'function') {
-                    toggleSidebar(false);
+                if (titleEl) {
+                    const names = {'dashboard':'لوحة التحكم','students':'إدارة الطلاب','reports':'التقارير المالية','settings':'الإعدادات والنسخ','logs':'سجل الحركات'};
+                    titleEl.textContent = names[viewId] || 'النظام';
                 }
 
-                // Execution of specific view logic
-                if (viewId === 'dashboard') updateDashboard();
-                if (viewId === 'students') typeof renderStudentsTable === 'function' && renderStudentsTable();
-                if (viewId === 'reports') typeof renderReports === 'function' && renderReports();
-                if (viewId === 'logs') typeof renderLogs === 'function' && renderLogs();
+                if (typeof toggleSidebar === 'function') toggleSidebar(false);
 
-            } catch (err) {
-                console.error("Navigation error for view:", viewId, err);
-            }
+                if (viewId === 'dashboard') updateDashboard();
+                if (viewId === 'students' && typeof renderStudentsTable === 'function') renderStudentsTable();
+                if (viewId === 'reports' && typeof renderReports === 'function') renderReports();
+                if (viewId === 'logs' && typeof renderLogs === 'function') renderLogs();
+            } catch (err) { console.error("Navigation error:", err); }
         }
 
         // --- DASHBOARD LOGIC ---
