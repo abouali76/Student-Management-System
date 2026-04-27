@@ -72,9 +72,20 @@
         const DB_NAME = 'AcademiaProDB';
         let db;
         const req = indexedDB.open(DB_NAME, 2);
+        
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('students')) db.createObjectStore('students', { keyPath: 'id' });
+        };
+
         req.onsuccess = (e) => { 
             db = e.target.result;
-            load();
+            console.log("DB Ready");
+            load().catch(err => console.error("Load failed:", err));
+        };
+
+        req.onerror = (e) => {
+            alert("فشل فتح قاعدة البيانات: " + e.target.error);
         };
 
         async function load() {
