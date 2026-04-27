@@ -69,7 +69,7 @@
                     let items = null;
                     if (imported.data && imported.data[s]) items = imported.data[s];
                     else if (imported[s]) items = imported[s];
-                    
+
                     if (items) {
                         const t = this.db.transaction([s], 'readwrite');
                         t.objectStore(s).clear();
@@ -529,7 +529,7 @@
             background-color: rgba(245, 158, 11, 0.08) !important;
             border-color: rgba(245, 158, 11, 0.2) !important;
         }
-        
+
         .row-paid td {
             background-color: rgba(16, 185, 129, 0.08) !important;
             border-color: rgba(16, 185, 129, 0.2) !important;
@@ -881,10 +881,11 @@
 
             .sidebar {
                 position: fixed;
-                right: -280px; /* Hide off-screen */
+                right: -280px;
+                /* Hide off-screen */
                 top: 0;
                 transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.2);
             }
 
             .sidebar.open {
@@ -895,7 +896,7 @@
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(4px);
                 z-index: 99;
             }
@@ -937,12 +938,18 @@
                 border: none;
             }
 
-            table, thead, tbody, th, td, tr {
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
                 display: block;
             }
 
             thead tr {
-                display: none; /* Hide headers on mobile */
+                display: none;
+                /* Hide headers on mobile */
             }
 
             tr {
@@ -973,7 +980,7 @@
                 text-align: right;
                 font-size: 0.8rem;
             }
-            
+
             /* Specific fix for student cell on mobile */
             .student-cell {
                 justify-content: flex-start;
@@ -1003,7 +1010,8 @@
         <div class="brand">
             <div class="brand-logo">🎓</div>
             <div class="brand-text">
-                <h1>أكاديميا برو <span style="font-size: 0.6rem; color: var(--accent); vertical-align: middle;">v2.6</span></h1>
+                <h1>أكاديميا برو <span
+                        style="font-size: 0.6rem; color: var(--accent); vertical-align: middle;">v2.6</span></h1>
                 <p>نظام إدارة متكامل</p>
                 <p id="user-role-badge"
                     style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-top: 4px; border: 1px solid rgba(16, 185, 129, 0.2);">
@@ -1067,7 +1075,8 @@
         <!-- DASHBOARD VIEW -->
         <div id="view-dashboard" class="view-section">
 
-            <div class="glass-card" style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: rgba(99, 102, 241, 0.05);">
+            <div class="glass-card"
+                style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap; padding: 1rem; background: rgba(99, 102, 241, 0.05);">
                 <span style="font-weight: 700; color: var(--primary); margin-left: 10px;">إمكانية الوصول السريع:</span>
                 <button class="btn btn-outline btn-sm" onclick="showView('students')">👥 الطلاب</button>
                 <button class="btn btn-outline btn-sm" onclick="showView('reports')">📊 التقارير</button>
@@ -1258,7 +1267,8 @@
                 <div class="section-header">
                     <h3>إعدادات الأمان</h3>
                 </div>
-                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">يمكنك تغيير كلمة المرور الخاصة بدخول النظام من هنا.</p>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">يمكنك تغيير كلمة المرور الخاصة بدخول النظام
+                    من هنا.</p>
 
                 <form id="change-password-form" onsubmit="handleChangePassword(event)">
                     <div style="display: grid; gap: 1rem;">
@@ -1276,7 +1286,8 @@
                         </div>
                         <button type="submit" class="btn btn-primary">🔐 تحديث كلمة المرور</button>
                     </div>
-                    <div id="password-message" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none;"></div>
+                    <div id="password-message"
+                        style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none;"></div>
                 </form>
             </div>
         </div>
@@ -1468,6 +1479,7 @@
         }
 
         // --- NAVIGATION ---
+        // --- NAVIGATION ---
         function showView(viewId, element) {
             console.log("Showing View:", viewId);
             document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
@@ -1497,7 +1509,7 @@
                 if (viewId === 'reports') renderReports();
                 if (viewId === 'settings') console.log("Settings view ready");
                 if (viewId === 'logs') renderLogs();
-            } catch(e) { console.error("View render error:", e); }
+            } catch (e) { console.error("View render error:", e); }
         }
 
         // --- DASHBOARD LOGIC ---
@@ -1572,7 +1584,7 @@
             const elSearch = document.getElementById('search-students');
             const elLevel = document.getElementById('filter-level');
             const elStatus = document.getElementById('filter-status');
-            
+
             if (!elSearch || !elLevel || !elStatus) return;
 
             const query = elSearch.value.toLowerCase();
@@ -1866,7 +1878,7 @@
                 a.href = url;
                 a.download = `backup_academia_full_${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
-                
+
                 await db.logAction('system', 'تم تصدير نسخة احتياطية كاملة للبيانات.');
             } catch (err) {
                 alert("حدث خطأ أثناء تصدير البيانات.");
@@ -1884,7 +1896,7 @@
                         await db.importAllData(content);
                         await saveAndSync();
                         alert('✅ تم استيراد البيانات بنجاح!');
-                        
+
                         // Clear the input so it can be used again for the same file
                         input.value = '';
                     }
@@ -1910,9 +1922,6 @@
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `students_report_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1943,7 +1952,7 @@
                 // Update
                 await db.put('config', { key: 'admin_password', value: newPass });
                 await db.logAction('security', 'تم تغيير كلمة مرور النظام.');
-                
+
                 showMessage("تم تغيير كلمة المرور بنجاح ✅", "success");
                 document.getElementById('change-password-form').reset();
             } catch (err) {
@@ -1964,7 +1973,7 @@
         function toggleSidebar(force = null) {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
-            
+
             if (force !== null) {
                 if (force) {
                     sidebar.classList.add('open');
@@ -1978,6 +1987,14 @@
 
             sidebar.classList.toggle('open');
             overlay.classList.toggle('visible');
+        }
+
+        function logout() {
+            if(confirm('هل تريد بالتأكيد تسجيل الخروج؟')) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userRole');
+                window.location.href = 'index.html';
+            }
         }
 
         // Run Init
