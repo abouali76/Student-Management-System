@@ -15,8 +15,13 @@ class AcademiaDB {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
 
+            request.onblocked = () => {
+                alert("يرجى إغلاق كافة تبويبات الموقع الأخرى لإتمام تحديث النظام.");
+            };
+
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
+                console.log("Upgrading database to version", DB_VERSION);
 
                 // Students Store
                 if (!db.objectStoreNames.contains('students')) {
@@ -47,6 +52,13 @@ class AcademiaDB {
 
             request.onsuccess = (event) => {
                 this.db = event.target.result;
+
+                this.db.onversionchange = () => {
+                    this.db.close();
+                    alert("تم تحديث النظام بنجاح، سيتم إعادة تشغيل الصفحة الآن.");
+                    location.reload();
+                };
+
                 console.log("Database initialized successfully");
                 resolve(this.db);
             };
