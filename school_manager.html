@@ -1494,9 +1494,10 @@
 
             try {
                 if (viewId === 'dashboard') updateDashboard();
-                if (viewId === 'students' && typeof renderStudentsTable === 'function') renderStudentsTable();
-                if (viewId === 'reports' && typeof renderReports === 'function') renderReports();
-                if (viewId === 'logs' && typeof renderLogs === 'function') renderLogs();
+                if (viewId === 'students') renderStudentsTable();
+                if (viewId === 'reports') renderReports();
+                if (viewId === 'settings') console.log("Settings view ready");
+                if (viewId === 'logs') renderLogs();
             } catch(e) { console.error("View render error:", e); }
         }
 
@@ -1569,9 +1570,15 @@
 
         // --- STUDENTS LOGIC ---
         function renderStudentsTable() {
-            const query = document.getElementById('search-students').value.toLowerCase();
-            const levelFilter = document.getElementById('filter-level').value;
-            const statusFilter = document.getElementById('filter-status').value;
+            const elSearch = document.getElementById('search-students');
+            const elLevel = document.getElementById('filter-level');
+            const elStatus = document.getElementById('filter-status');
+            
+            if (!elSearch || !elLevel || !elStatus) return;
+
+            const query = elSearch.value.toLowerCase();
+            const levelFilter = elLevel.value;
+            const statusFilter = elStatus.value;
 
             const filtered = students.filter(s => {
                 const matchesSearch = s.name.toLowerCase().includes(query) || (s.phone || '').includes(query) || (s.address || '').toLowerCase().includes(query);
@@ -1798,6 +1805,7 @@
         // --- REPORTS LOGIC ---
         function renderReports() {
             const financialContainer = document.getElementById('financial-analysis');
+            if (!financialContainer) return;
             const totalExpected = students.reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
             const totalCollected = students.reduce((sum, s) => sum + (Number(s.paid) || 0), 0);
             const totalRemaining = totalExpected - totalCollected;
