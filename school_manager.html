@@ -65,10 +65,14 @@
                 const imported = JSON.parse(json);
                 const stores = ['students', 'transactions', 'logs', 'config'];
                 for (const s of stores) {
-                    if (imported.data[s]) {
+                    let items = null;
+                    if (imported.data && imported.data[s]) items = imported.data[s];
+                    else if (imported[s]) items = imported[s];
+                    
+                    if (items) {
                         const t = this.db.transaction([s], 'readwrite');
                         t.objectStore(s).clear();
-                        for (const item of imported.data[s]) await this.put(s, item);
+                        for (const item of items) await this.put(s, item);
                     }
                 }
                 return true;
