@@ -1385,37 +1385,55 @@
 
         // --- NAVIGATION ---
         function showView(viewId, element) {
-            const views = ['dashboard', 'students', 'reports', 'settings', 'logs'];
-            views.forEach(v => {
-                const el = document.getElementById(`view-${v}`);
-                if (el) el.style.display = (v === viewId) ? 'block' : 'none';
-            });
+            console.log("Navigating to:", viewId);
+            try {
+                const views = ['dashboard', 'students', 'reports', 'settings', 'logs'];
+                views.forEach(v => {
+                    const el = document.getElementById(`view-${v}`);
+                    if (el) el.style.display = (v === viewId) ? 'block' : 'none';
+                });
 
-            // Close sidebar on mobile after selection
-            if (window.innerWidth <= 768) {
-                toggleSidebar(false);
+                // Update UI active state
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                if (element) {
+                    element.classList.add('active');
+                } else {
+                    const navItems = document.querySelectorAll('.nav-item');
+                    navItems.forEach(item => {
+                        if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(viewId)) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
+
+                // Header Titles
+                const titles = {
+                    'dashboard': ['لوحة التحكم', 'أهلاً بك، إليك ملخص النظام لهذا اليوم.'],
+                    'students': ['إدارة الطلاب', 'بحث، تصفية، وتعديل بيانات الطلاب.'],
+                    'reports': ['التقارير المالية', 'تحليل الإيرادات واشتراكات الطلاب.'],
+                    'settings': ['الإعدادات والنسخ', 'إدارة قاعدة البيانات المحلية وتغيير السمات.'],
+                    'logs': ['سجل الحركات', 'تتبع كافة العمليات والتغييرات التي تمت على النظام.']
+                };
+
+                const titleEl = document.getElementById('view-title');
+                const subtitleEl = document.getElementById('view-subtitle');
+                if (titleEl && titles[viewId]) titleEl.textContent = titles[viewId][0];
+                if (subtitleEl && titles[viewId]) subtitleEl.textContent = titles[viewId][1];
+
+                // Auto-close sidebar on mobile
+                if (window.innerWidth <= 768 && typeof toggleSidebar === 'function') {
+                    toggleSidebar(false);
+                }
+
+                // Execution of specific view logic
+                if (viewId === 'dashboard') updateDashboard();
+                if (viewId === 'students') typeof renderStudentsTable === 'function' && renderStudentsTable();
+                if (viewId === 'reports') typeof renderReports === 'function' && renderReports();
+                if (viewId === 'logs') typeof renderLogs === 'function' && renderLogs();
+
+            } catch (err) {
+                console.error("Navigation error for view:", viewId, err);
             }
-
-            // Update UI state
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            if (element) element.classList.add('active');
-
-            // Update Titles
-            const titles = {
-                'dashboard': ['لوحة التحكم', 'أهلاً بك، إليك ملخص النظام لهذا اليوم.'],
-                'students': ['إدارة الطلاب', 'بحث، تصفية، وتعديل بيانات الطلاب.'],
-                'reports': ['التقارير المالية', 'تحليل الإيرادات واشتراكات الطلاب.'],
-                'settings': ['الإعدادات والنسخ', 'إدارة قاعدة البيانات المحلية وتغيير السمات.'],
-                'logs': ['سجل الحركات', 'تتبع كافة العمليات والتغييرات التي تمت على النظام.']
-            };
-            document.getElementById('view-title').textContent = titles[viewId][0];
-            document.getElementById('view-subtitle').textContent = titles[viewId][1];
-
-            // Render logic
-            if (viewId === 'dashboard') updateDashboard();
-            if (viewId === 'students') renderStudentsTable();
-            if (viewId === 'reports') renderReports();
-            if (viewId === 'logs') renderLogs();
         }
 
         // --- DASHBOARD LOGIC ---
