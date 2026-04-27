@@ -1468,7 +1468,6 @@
         }
 
         // --- NAVIGATION ---
-        // --- NAVIGATION ---
         function showView(viewId, element) {
             console.log("Showing View:", viewId);
             document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
@@ -1917,10 +1916,6 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-                    alert("فشل استيراد البيانات. تأكد من صحة الملف.");
-                }
-            };
-            reader.readAsText(input.files[0]);
         }
 
         async function handleChangePassword(e) {
