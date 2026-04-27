@@ -1386,30 +1386,37 @@
         // --- NAVIGATION ---
         // --- NAVIGATION ---
         function showView(viewId, element) {
-            console.log("Navigating to:", viewId);
+            console.log("Showing View:", viewId);
+            const views = ['dashboard', 'students', 'reports', 'settings', 'logs'];
+            
+            views.forEach(v => {
+                const el = document.getElementById('view-' + v);
+                if (el) el.style.display = (v === viewId) ? 'block' : 'none';
+            });
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            const titleEl = document.getElementById('view-title');
+            if (titleEl) {
+                const names = {
+                    'dashboard': 'لوحة التحكم',
+                    'students': 'إدارة الطلاب',
+                    'reports': 'التقارير المالية',
+                    'settings': 'الإعدادات والنسخ',
+                    'logs': 'سجل الحركات'
+                };
+                titleEl.textContent = names[viewId] || 'النظام';
+            }
+
+            if (typeof toggleSidebar === 'function') toggleSidebar(false);
+
             try {
-                const views = ['dashboard', 'students', 'reports', 'settings', 'logs'];
-                views.forEach(v => {
-                    const el = document.getElementById(`view-${v}`);
-                    if (el) el.style.display = (v === viewId) ? 'block' : 'none';
-                });
-
-                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-                if (element) element.classList.add('active');
-
-                const titleEl = document.getElementById('view-title');
-                if (titleEl) {
-                    const names = {'dashboard':'لوحة التحكم','students':'إدارة الطلاب','reports':'التقارير المالية','settings':'الإعدادات والنسخ','logs':'سجل الحركات'};
-                    titleEl.textContent = names[viewId] || 'النظام';
-                }
-
-                if (typeof toggleSidebar === 'function') toggleSidebar(false);
-
                 if (viewId === 'dashboard') updateDashboard();
                 if (viewId === 'students' && typeof renderStudentsTable === 'function') renderStudentsTable();
                 if (viewId === 'reports' && typeof renderReports === 'function') renderReports();
                 if (viewId === 'logs' && typeof renderLogs === 'function') renderLogs();
-            } catch (err) { console.error("Navigation error:", err); }
+            } catch(e) { console.error("View render error:", e); }
         }
 
         // --- DASHBOARD LOGIC ---
