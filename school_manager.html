@@ -5,7 +5,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة المؤسسة التعليمية | Premium</title>
-    <script src="db.js"></script>
+    <script>
+        /**
+         * AcademiaPro Database Manager (Embedded v2.5)
+         */
+        const DB_NAME = 'AcademiaProDB';
+        const DB_VERSION = 2;
+
+        class AcademiaDB {
+            constructor() { this.db = null; }
+            async init() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onblocked = () => alert("يرجى إغلاق كافة تبويبات الموقع الأخرى لإتمام تحديث النظام.");
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains('students')) {
+                            const s = db.createObjectStore('students', { keyPath: 'id' });
+                            s.createIndex('name', 'name', { unique: false });
+                            s.createIndex('level', 'level', { unique: false });
+                        }
+                        if (!db.objectStoreNames.contains('transactions')) db.createObjectStore('transactions', { keyPath: 'id', autoIncrement: true });
+                        if (!db.objectStoreNames.contains('logs')) db.createObjectStore('logs', { keyPath: 'id', autoIncrement: true });
+                        if (!db.objectStoreNames.contains('config')) db.createObjectStore('config', { keyPath: 'key' });
+                    };
+                    request.onsuccess = (event) => {
+                        this.db = event.target.result;
+                        this.db.onversionchange = () => { this.db.close(); location.reload(); };
+                        resolve(this.db);
+                    };
+                    request.onerror = (e) => reject(e.target.error);
+                });
+            }
+            async add(s, d) { return new Promise((res, rej) => { const t = this.db.transaction([s], 'readwrite'); const st = t.objectStore(s); const r = st.add(d); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+            async put(s, d) { return new Promise((res, rej) => { const t = this.db.transaction([s], 'readwrite'); const st = t.objectStore(s); const r = st.put(d); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+            async get(s, i) { return new Promise((res, rej) => { const t = this.db.transaction([s], 'readonly'); const st = t.objectStore(s); const r = st.get(i); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+            async getAll(s) { return new Promise((res, rej) => { const t = this.db.transaction([s], 'readonly'); const st = t.objectStore(s); const r = st.getAll(); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+            async delete(s, i) { return new Promise((res, rej) => { const t = this.db.transaction([s], 'readwrite'); const st = t.objectStore(s); const r = st.delete(i); r.onsuccess = () => res(true); r.onerror = () => rej(r.error); }); }
+            async logAction(type, description) { return this.add('logs', { type, description, timestamp: new Date().toISOString() }); }
+            async getLogs(limit = 100) {
+                return new Promise((resolve) => {
+                    const transaction = this.db.transaction(['logs'], 'readonly');
+                    const store = transaction.objectStore('logs');
+                    const results = [];
+                    store.openCursor(null, 'prev').onsuccess = (e) => {
+                        const cursor = e.target.result;
+                        if (cursor && results.length < limit) { results.push(cursor.value); cursor.continue(); }
+                        else resolve(results);
+                    };
+                });
+            }
+            async exportAllData() {
+                const stores = ['students', 'transactions', 'logs', 'config'];
+                const exportData = {};
+                for (const s of stores) exportData[s] = await this.getAll(s);
+                return JSON.stringify({ version: DB_VERSION, data: exportData }, null, 2);
+            }
+            async importAllData(json) {
+                const imported = JSON.parse(json);
+                const stores = ['students', 'transactions', 'logs', 'config'];
+                for (const s of stores) {
+                    if (imported.data[s]) {
+                        const t = this.db.transaction([s], 'readwrite');
+                        t.objectStore(s).clear();
+                        for (const item of imported.data[s]) await this.put(s, item);
+                    }
+                }
+                return true;
+            }
+        }
+        const db = new AcademiaDB();
+    </script>
     <script>
         // Simple login check with error handling
         try {
@@ -928,7 +998,7 @@
         <div class="brand">
             <div class="brand-logo">🎓</div>
             <div class="brand-text">
-                <h1>أكاديميا برو <span style="font-size: 0.6rem; color: var(--accent); vertical-align: middle;">v2.1</span></h1>
+                <h1>أكاديميا برو <span style="font-size: 0.6rem; color: var(--accent); vertical-align: middle;">v2.5</span></h1>
                 <p>نظام إدارة متكامل</p>
                 <p id="user-role-badge"
                     style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-top: 4px; border: 1px solid rgba(16, 185, 129, 0.2);">
