@@ -98,6 +98,31 @@
             margin-top: 1rem;
             display: none;
         }
+
+        .success-message {
+            color: #10b981;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .toggle-link {
+            display: block;
+            margin-top: 1.5rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .toggle-link:hover {
+            color: var(--primary);
+        }
+
+        #changePasswordForm {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +138,26 @@
             </div>
             <button type="submit">دخول</button>
             <div id="errorMessage" class="error-message">كلمة المرور غير صحيحة!</div>
+            <a class="toggle-link" id="showChangePass">تغيير الرقم السري؟</a>
+        </form>
+
+        <form id="changePasswordForm">
+            <div class="input-group">
+                <label>الرقم السري الحالي</label>
+                <input type="password" id="currentPass" placeholder="••••" required>
+            </div>
+            <div class="input-group">
+                <label>الرقم السري الجديد</label>
+                <input type="password" id="newPass" placeholder="••••" required>
+            </div>
+            <div class="input-group">
+                <label>تأكيد الرقم الجديد</label>
+                <input type="password" id="confirmPass" placeholder="••••" required>
+            </div>
+            <button type="submit">تحديث الرقم السري</button>
+            <div id="changeErrorMessage" class="error-message"></div>
+            <div id="changeSuccessMessage" class="success-message">تم تغيير الرقم السري بنجاح!</div>
+            <a class="toggle-link" id="showLogin">العودة لتسجيل الدخول</a>
         </form>
     </div>
 
@@ -144,6 +189,12 @@
                 const t = this.db.transaction([s], 'readonly'); 
                 const r = t.objectStore(s).get(i); 
                 r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); 
+            }); }
+            async put(s, d) { return new Promise((res, rej) => {
+                if(!this.db) return rej("DB not initialized");
+                const t = this.db.transaction([s], 'readwrite');
+                const r = t.objectStore(s).put(d);
+                r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
             }); }
         }
         const db = new AcademiaDB();
@@ -191,6 +242,77 @@
                     localStorage.setItem('isLoggedIn', 'true');
                     window.location.href = 'school_manager.html';
                 }
+            }
+        });
+
+        // Toggle logic
+        const changePasswordForm = document.getElementById('changePasswordForm');
+        const showChangePass = document.getElementById('showChangePass');
+        const showLogin = document.getElementById('showLogin');
+        const subtitle = document.querySelector('.subtitle');
+        const title = document.querySelector('h1');
+
+        showChangePass.onclick = () => {
+            loginForm.style.display = 'none';
+            changePasswordForm.style.display = 'block';
+            title.textContent = 'تغيير الرقم السري';
+            subtitle.textContent = 'يرجى إدخال البيانات المطلوبة';
+        };
+
+        showLogin.onclick = () => {
+            changePasswordForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            title.textContent = 'دخول النظام';
+            subtitle.textContent = 'يرجى إدخال كلمة المرور';
+        };
+
+        // Change Password Logic
+        changePasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPass = document.getElementById('currentPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const confirmPass = document.getElementById('confirmPass').value;
+            const changeError = document.getElementById('changeErrorMessage');
+            const changeSuccess = document.getElementById('changeSuccessMessage');
+
+            if (newPass !== confirmPass) {
+                changeError.textContent = 'الأرقام الجديدة غير متطابقة!';
+                changeError.style.display = 'block';
+                setTimeout(() => changeError.style.display = 'none', 3000);
+                return;
+            }
+
+            try {
+                await dbPromise;
+                let actualPass = '1';
+                const config = await db.get('config', 'admin_password');
+                if (config) actualPass = config.value;
+
+                if (currentPass !== actualPass && !(actualPass === '1' && (currentPass === '1' || currentPass === '123'))) {
+                    changeError.textContent = 'الرقم السري الحالي غير صحيح!';
+                    changeError.style.display = 'block';
+                    setTimeout(() => changeError.style.display = 'none', 3000);
+                    return;
+                }
+
+                // Update DB
+                await db.put('config', { key: 'admin_password', value: newPass });
+                
+                changeSuccess.style.display = 'block';
+                setTimeout(() => {
+                    changeSuccess.style.display = 'none';
+                    showLogin.click(); // Back to login
+                }, 2000);
+                
+                // Clear fields
+                document.getElementById('currentPass').value = '';
+                document.getElementById('newPass').value = '';
+                document.getElementById('confirmPass').value = '';
+
+            } catch (err) {
+                console.error(err);
+                changeError.textContent = 'حدث خطأ أثناء تحديث الرقم السري';
+                changeError.style.display = 'block';
             }
         });
     </script>
